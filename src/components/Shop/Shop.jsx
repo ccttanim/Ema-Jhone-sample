@@ -12,16 +12,51 @@ const Shop = () => {
         .then(res => res.json())
         .then(data => setProducts(data))
     }, []);
+
 // show in cart
     useEffect(() => {
+
         const storedCart = getShoppingCart();
-        console.log(storedCart);
-    },[])
+        const savedCart = [];
+
+        //step1: get id of the addedProduct   
+        for(const id in storedCart){
+
+            //step2: get the product by using id
+            const addedProduct = products.find(product => product.id === id)
+
+            if(addedProduct){
+                //step3: get quantity of the product
+                const quantity = storedCart[id];
+                addedProduct.quantity = quantity;
+                //step4: add the added product to the saved cart
+                savedCart.push(addedProduct);
+            }
+            //step5: set the cart
+            setCart(savedCart);
+
+            console.log(addedProduct);
+        }
+    },[products])
 
 // For add new product in react use this method
     const handleAddToCart =(product)=>{
-        const newCart = [...cart, product];
+        let newCart = [];
+       // const newCart = [...cart, product];
+       //if product doesn't exist in the cart, then set the quantity = 1
+       const exists = cart.find(pd => pd.id === product.id);
+        if(!exists){
+            product.quantity = 1;
+            newCart = [...cart, product]
+        }
+        else{
+            exists.quantity = exists.quantity + 1; 
+            const remaining = cart.filter(pd => pd.id !== product.id);
+            newCart = [...remaining, exists];
+        }
+
         setCart(newCart);
+
         //Localstorage
         addToDb(product.id);
      }
